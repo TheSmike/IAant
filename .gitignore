@@ -32,3 +32,7 @@ _ReSharper*/
 .vs/
 #Nuget packages folder
 packages/
+.classpath
+.project
+.settings
+target/
