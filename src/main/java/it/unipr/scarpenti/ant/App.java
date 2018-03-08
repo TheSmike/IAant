@@ -15,7 +15,6 @@ import javax.swing.JFrame;
 public class App {
 
 	public static final int PANEL_SIZE = 600;
-	public static final int m = 0;
 
 	public static void main(String[] args) throws Exception {
 
@@ -34,6 +33,7 @@ public class App {
 		System.out.println("App1");
 		Container contentPane = frame.getContentPane();
 		System.out.println("contentPane size = " + contentPane.getSize());
+		int m = Integer.parseInt(PropertiesFactory.getProperties().getProperty("m_for_visibility"));
 		contentPane.add(new GamePlay(PANEL_SIZE, m));
 
 		System.out.println("App2");

@@ -181,7 +181,7 @@ public class GamePlay extends JPanel implements KeyListener {
 		if (posChanged) {
 			moves--;
 			System.out.println(ant + ". Mosse rimaste: " + moves);
-			List<Integer> neighbourhood = chessboard.getChessBoardNeighbourhood(ant.getAntPosition(), VISUAL_FIELD);
+			int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(ant.getAntPosition(), VISUAL_FIELD);
 			arffFile.writeCase(neighbourhood, keyCode);
 			System.out.println(neighbourhood);
 			
