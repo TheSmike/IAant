@@ -52,7 +52,7 @@ public class GamePlay extends JPanel implements KeyListener {
 	public GamePlay(int panelSize, int m) throws Exception {
 		super();
 		M = m;
-		VISUAL_FIELD = 2 * M + 1;
+		VISUAL_FIELD = 2 * M + 1;		
 		PANEL_SIZE = panelSize;
 		SQUARE_DIM = 50;
 		xPos = 0 - 11; //START_POS_X
@@ -117,10 +117,10 @@ public class GamePlay extends JPanel implements KeyListener {
 		//oscura zone non visibili
 		if (!endGame) {
 			g.setColor(Color.BLACK);
-			myFillRect(g, 0, -8, PANEL_SIZE, yPos - SQUARE_DIM*VISUAL_FIELD);  //UP square 
-			myFillRect(g, 0, 0, xPos - SQUARE_DIM*VISUAL_FIELD +11, PANEL_SIZE);
-			myFillRect(g, xPos+62 + SQUARE_DIM*VISUAL_FIELD, 0, PANEL_SIZE - (xPos+53 + SQUARE_DIM*VISUAL_FIELD), PANEL_SIZE);  
-			myFillRect(g, 0, yPos + 43 + SQUARE_DIM*VISUAL_FIELD, PANEL_SIZE, PANEL_SIZE - (yPos + 36 + SQUARE_DIM*VISUAL_FIELD));
+			myFillRect(g, 0, -8, PANEL_SIZE, yPos - SQUARE_DIM*M);  //UP square 
+			myFillRect(g, 0, 0, xPos - SQUARE_DIM*M +11, PANEL_SIZE);
+			myFillRect(g, xPos+62 + SQUARE_DIM*M, 0, PANEL_SIZE - (xPos+53 + SQUARE_DIM*M), PANEL_SIZE);  
+			myFillRect(g, 0, yPos + 43 + SQUARE_DIM*M, PANEL_SIZE, PANEL_SIZE - (yPos + 36 + SQUARE_DIM*M));
 		}
 		//CHECKME ci vuole?
 		g.dispose();
@@ -172,7 +172,7 @@ public class GamePlay extends JPanel implements KeyListener {
 			Direction keyCode = Direction.getDirectionFromCode(arg0.getKeyCode());
 			moves--;
 			System.out.println(ant + ". Mosse rimaste: " + moves);
-			int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(ant.getAntPosition(), VISUAL_FIELD);
+			int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(ant.getAntPosition(), M);
 			arffFile.writeCase(neighbourhood, keyCode);
 			System.out.println(neighbourhood);
 			

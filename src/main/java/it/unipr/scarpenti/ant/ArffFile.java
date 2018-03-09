@@ -29,7 +29,7 @@ public class ArffFile {
 	public ArffFile(int m) throws Exception {
 		this.m = m;
 		DateFormat df = new SimpleDateFormat("yyyyMMdd_hhmmss");
-		String fileName = String.format("ant_m%s_%s.txt", m, df.format(new Date()));
+		String fileName = String.format("ant_m%s_%s.arff", m, df.format(new Date()));
 		Properties properties = PropertiesFactory.getProperties();
 		Path pathOut = Paths.get(properties.getProperty("output_folder") + fileName);
 		this.file = pathOut;
