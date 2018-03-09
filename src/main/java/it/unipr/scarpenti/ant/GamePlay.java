@@ -37,11 +37,6 @@ public class GamePlay extends JPanel implements KeyListener {
 	private static final int SCORE_Y_OFFSET = 15;
 	private static final int SQUARE_X_OFFSET = 0;
 	private static final int SQUARE_Y_OFFSET = 0;	
-		
-	/*OTHERS*/
-	public enum Direction {
-		UP,DOWN,RIGHT,LEFT;
-	}
 	
 	private int xPos;
 	private int yPos;
@@ -147,30 +142,25 @@ public class GamePlay extends JPanel implements KeyListener {
 		}
 		
 		boolean posChanged = false;
-		String keyCode = "";
 		switch (arg0.getKeyCode()) {
 		case KeyEvent.VK_UP:
 			yPos -= SQUARE_DIM;
 			ant.moveUp();
-			keyCode = "up";
 			posChanged = true;
 			break;
 		case KeyEvent.VK_DOWN:
 			yPos += SQUARE_DIM;
 			ant.moveDown();
-			keyCode = "down";
 			posChanged = true;
 			break;
 		case KeyEvent.VK_RIGHT:
 			xPos += SQUARE_DIM;
 			ant.moveRight();
-			keyCode = "right";
 			posChanged = true;
 			break;
 		case KeyEvent.VK_LEFT:
 			xPos -= SQUARE_DIM;
 			ant.moveLeft();
-			keyCode = "left";
 			posChanged = true;
 			break;
 
@@ -179,6 +169,7 @@ public class GamePlay extends JPanel implements KeyListener {
 		}  
 		
 		if (posChanged) {
+			Direction keyCode = Direction.getDirectionFromCode(arg0.getKeyCode());
 			moves--;
 			System.out.println(ant + ". Mosse rimaste: " + moves);
 			int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(ant.getAntPosition(), VISUAL_FIELD);

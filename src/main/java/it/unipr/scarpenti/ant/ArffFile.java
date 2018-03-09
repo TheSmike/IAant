@@ -24,8 +24,8 @@ public class ArffFile {
 
 	private int m;
 	private PrintWriter writer;
-	private Path file; 
-	
+	private Path file;
+
 	public ArffFile(int m) throws Exception {
 		this.m = m;
 		DateFormat df = new SimpleDateFormat("yyyyMMdd_hhmmss");
@@ -33,45 +33,48 @@ public class ArffFile {
 		Properties properties = PropertiesFactory.getProperties();
 		Path pathOut = Paths.get(properties.getProperty("output_folder") + fileName);
 		this.file = pathOut;
-		InputStream templateResource = getClass().getClassLoader().getResourceAsStream(String.format("template/template_m%s.arff", properties.getProperty("m_for_visibility")));
-		//Path pathTemplate = Paths.get("template/template_m" + properties.getProperty("m_for_visibility"));
-		Files.copy(templateResource , pathOut);
+		InputStream templateResource = getClass().getClassLoader().getResourceAsStream(
+				String.format("template/template_m%s.arff", properties.getProperty("m_for_visibility")));
+		// Path pathTemplate = Paths.get("template/template_m" +
+		// properties.getProperty("m_for_visibility"));
+		//Files.copy(templateResource, pathOut);
 	}
 
-	public void writeCase(int[][] neighbourhood, String key) {
-		
+	public void writeCase(int[][] neighbourhood, Direction keyCode) {
+
 		try {
-			StringBuilder sb = new StringBuilder();
 			writer = new PrintWriter(new FileOutputStream(file.toFile(), true), true);
-			
-			for (int i = 0; i < neighbourhood.length; i++) {
-				for (int j = 0; j < neighbourhood.length; j++) {
-					sb.append(neighbourhood[i][j]).append(',');
+
+			for (int i = 0; i < 4; i++) {
+				StringBuilder sb = new StringBuilder();
+				for (int r = 0; r < neighbourhood.length; r++) {
+					for (int c = 0; c < neighbourhood.length; c++) {
+						sb.append(neighbourhood[r][c]).append(',');
+					}
+				}
+				sb.append(keyCode.toString());
+				writer.println(sb.toString());
+
+				if (i < 4 - 1) {
+					int[][] newNeighbourhood = new int[neighbourhood.length][neighbourhood.length];
+					for (int r = 0; r < newNeighbourhood.length; r++) {
+						for (int c = 0; c < newNeighbourhood.length; c++) {
+							newNeighbourhood[r][c] = neighbourhood[newNeighbourhood.length - 1 - c][r];
+						}
+					}
+					keyCode = keyCode.clockwiseNext();
+					neighbourhood = newNeighbourhood;
 				}
 			}
-			sb.append(key);
-			writer.println(sb.toString());
-			
-//			for (int i = 0; i < 3; i++) {
-//				StringBuilder sb = new StringBuilder();
-//				for (Integer value : newNeighbourhood) {
-//					sb.append(value).append(',');
-//				}
-//				List<Integer> oldNeighbourhood = newNeighbourhood;
-//				newNeighbourhood = new ArrayList<>();
-//				newNeighbourhood.add(oldNeighbourhood.get(2));
-//				
-//				
-//			}
+			writer.println();
+
 		} catch (Exception e) {
 			throw new RuntimeException("writeArff error", e);
-		}
-		finally {
+		} finally {
 			if (writer != null)
 				writer.close();
 		}
-		
-		
+
 	}
-	
+
 }
