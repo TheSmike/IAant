@@ -4,29 +4,23 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import it.unipr.scarpenti.ant.exception.AntGameException;
+
 public class GamePlay extends JPanel implements KeyListener {
 
-	/*EDITABLE CONST*/
+	/* EDITABLE CONST */
 	private static final int N = 10;
-	private final int  M ;
-	private final int  VISUAL_FIELD;
+	private final int visualField;
 	private final int PANEL_SIZE;
 	private final int SQUARE_DIM;
-	
-	/*STATIC CONST*/
+
+	/* STATIC CONST */
 	private static final long serialVersionUID = 6353883395159239509L;
 	private static final String IMG_PATH = "src/main/resources/img/";
 	private static final ImageIcon ANT_RIGHT = getImage("antRightSmall.png");
@@ -36,111 +30,140 @@ public class GamePlay extends JPanel implements KeyListener {
 	private static final int SCORE_X_OFFSET = 18;
 	private static final int SCORE_Y_OFFSET = 15;
 	private static final int SQUARE_X_OFFSET = 0;
-	private static final int SQUARE_Y_OFFSET = 0;	
-	
+	private static final int SQUARE_Y_OFFSET = 0;
+	private static final int START_POS_X = - 11;  
+	private static final int START_POS_Y = + 8; 
+
 	private int xPos;
 	private int yPos;
-	private int score = 0;
-	private boolean endGame = false;
+	private int score;
+	private boolean endRound = false;
 	private Chessboard chessboard;
 	private Ant ant;
-	private ArffFile arffFile; 
-	private int moves = 2*N;
-	
-	
-		
+	private ArffFile arffFile;
+	private int moves;
+	private Throwable throwedException = null;
+	private boolean newRound;
+	private int matchNumber;
+
 	public GamePlay(int panelSize, int m) throws Exception {
 		super();
-		M = m;
-		VISUAL_FIELD = 2 * M + 1;		
+		visualField = m;
 		PANEL_SIZE = panelSize;
 		SQUARE_DIM = 50;
-		xPos = 0 - 11; //START_POS_X
-		yPos = 0 + 8; //START_POS_Y 
-		
-		
+
 		addKeyListener(this);
 		setFocusable(true);
-		setFocusTraversalKeysEnabled(false);  
+		setFocusTraversalKeysEnabled(false);
+		arffFile = new ArffFile(m);
+		newRound = true;
+		matchNumber = 0;
+	}
+
+	private void initRound() {
+		score = 0;
+		moves = 2 * N;
 		chessboard = new Chessboard(N);
 		Position initAntPosition = chessboard.initBaord();
 		ant = new Ant(initAntPosition);
-		arffFile = new ArffFile(m);
-		
+
 		System.out.println(ant);
-		xPos += (ant.getAntPosition().getC()) *  SQUARE_DIM;
-		yPos += (ant.getAntPosition().getR()) *  SQUARE_DIM;
+		xPos = START_POS_X + (ant.getAntPosition().getC()) * SQUARE_DIM;
+		yPos = START_POS_Y + (ant.getAntPosition().getR()) * SQUARE_DIM;
+		newRound = false;
+		endRound = false;
+		
+		try {
+			arffFile.writeComment("% match " + ++matchNumber);
+		} catch (AntGameException e) {
+			throwedException = e;
+		}
 	}
-	
+
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
-		g.setColor(Color.RED);
-		g.fillRect(0, 0, PANEL_SIZE, PANEL_SIZE);        
-		g.setColor(Color.darkGray);
-		g.fillRect(SQUARE_DIM, SQUARE_DIM, PANEL_SIZE-SQUARE_DIM*2, PANEL_SIZE-SQUARE_DIM*2);        
+		
+		if (newRound)
+			initRound();
 
-		//disegna righe griglia
-		g.setColor(Color.lightGray);
-		for (int i = 0; i < N+1; i++) {
-			g.drawLine(SQUARE_DIM*(1+i), SQUARE_DIM, SQUARE_DIM*(1+i), PANEL_SIZE - SQUARE_DIM); //rows
-			g.drawLine(SQUARE_DIM, SQUARE_DIM*(1+i), PANEL_SIZE - SQUARE_DIM, SQUARE_DIM*(1+i)); //cols			
+		//handleError
+		if (throwedException != null) {
+			throwedException.printStackTrace();
+			System.out.println("END");
+			JOptionPane.showMessageDialog(this, throwedException.getMessage(), "ERRORE", JOptionPane.ERROR_MESSAGE);
+			System.exit(0);
 		}
-		//disegna sfondo caselle intorno
-	    int rAnt = ant.getAntPosition().getR();
-	    int cAnt =  ant.getAntPosition().getC();
-	    for (int r = 0; r < N+2; r++) {
-			for (int c = 0; c < N+2; c++) {	
-				Integer value = chessboard.getSquareValue(r,c);
+
+		g.setColor(Color.RED);
+		g.fillRect(0, 0, PANEL_SIZE, PANEL_SIZE);
+		g.setColor(Color.darkGray);
+		g.fillRect(SQUARE_DIM, SQUARE_DIM, PANEL_SIZE - SQUARE_DIM * 2, PANEL_SIZE - SQUARE_DIM * 2);
+
+		// disegna righe griglia
+		g.setColor(Color.lightGray);
+		for (int i = 0; i < N + 1; i++) {
+			g.drawLine(SQUARE_DIM * (1 + i), SQUARE_DIM, SQUARE_DIM * (1 + i), PANEL_SIZE - SQUARE_DIM); // rows
+			g.drawLine(SQUARE_DIM, SQUARE_DIM * (1 + i), PANEL_SIZE - SQUARE_DIM, SQUARE_DIM * (1 + i)); // cols
+		}
+		// disegna sfondo caselle intorno
+		for (int r = 0; r < N + 2; r++) {
+			for (int c = 0; c < N + 2; c++) {
+				Integer value = chessboard.getSquareValue(r, c);
 				if (value != null) {
-					if (value > -N-2 && value < 0) {
+					if (value > -N - 2 && value < 0) {
 						g.setColor(new Color(128, 133, 0));
-						g.fillRect( (c * SQUARE_DIM)+1 + SQUARE_X_OFFSET , (r*SQUARE_DIM)+1 + SQUARE_Y_OFFSET, SQUARE_DIM-1, SQUARE_DIM-1);
+						g.fillRect((c * SQUARE_DIM) + 1 + SQUARE_X_OFFSET, (r * SQUARE_DIM) + 1 + SQUARE_Y_OFFSET,
+								SQUARE_DIM - 1, SQUARE_DIM - 1);
 					}
 					g.setColor(Color.WHITE);
 					char[] valueStr = String.valueOf(value).toCharArray();
-					g.drawChars(valueStr, 0, valueStr.length, (c) * SQUARE_DIM + SCORE_X_OFFSET , r * SQUARE_DIM + SCORE_Y_OFFSET);
-					
+					g.drawChars(valueStr, 0, valueStr.length, (c) * SQUARE_DIM + SCORE_X_OFFSET,
+							r * SQUARE_DIM + SCORE_Y_OFFSET);
+
 				}
 			}
-	    }	    
+		}
 
-		//disegna formica
-		ANT_RIGHT.paintIcon(this, g, xPos , yPos);
-	    
-		//disegna cibo
+		// disegna formica
+		ANT_RIGHT.paintIcon(this, g, xPos, yPos);
+
+		// disegna cibo
 		List<Position> foodList = chessboard.getFoodList();
 		for (Position position : foodList) {
-			FOOD.paintIcon(this, g, (position.getC()) * SQUARE_DIM + FOOD_X_OFFSET, (position.getR()) *  SQUARE_DIM + FOOD_Y_OFFSET);			
+			FOOD.paintIcon(this, g, (position.getC()) * SQUARE_DIM + FOOD_X_OFFSET,
+					(position.getR()) * SQUARE_DIM + FOOD_Y_OFFSET);
 		}
-	    
-		//oscura zone non visibili
-		if (!endGame) {
+
+		// oscura zone non visibili
+		if (!endRound) {
 			g.setColor(Color.BLACK);
-			myFillRect(g, 0, -8, PANEL_SIZE, yPos - SQUARE_DIM*M);  //UP square 
-			myFillRect(g, 0, 0, xPos - SQUARE_DIM*M +11, PANEL_SIZE);
-			myFillRect(g, xPos+62 + SQUARE_DIM*M, 0, PANEL_SIZE - (xPos+53 + SQUARE_DIM*M), PANEL_SIZE);  
-			myFillRect(g, 0, yPos + 43 + SQUARE_DIM*M, PANEL_SIZE, PANEL_SIZE - (yPos + 36 + SQUARE_DIM*M));
+			myFillRect(g, 0, -8, PANEL_SIZE, yPos - SQUARE_DIM * visualField); // UP square
+			myFillRect(g, 0, 0, xPos - SQUARE_DIM * visualField + 11, PANEL_SIZE);
+			myFillRect(g, xPos + 62 + SQUARE_DIM * visualField, 0, PANEL_SIZE - (xPos + 53 + SQUARE_DIM * visualField),
+					PANEL_SIZE);
+			myFillRect(g, 0, yPos + 43 + SQUARE_DIM * visualField, PANEL_SIZE,
+					PANEL_SIZE - (yPos + 36 + SQUARE_DIM * visualField));
 		}
-		//CHECKME ci vuole?
+		// CHECKME ci vuole?
 		g.dispose();
-		
+
 	}
-	
+
 	private void myFillRect(Graphics g, int x, int y, int width, int height) {
-		if (width>0 && height > 0)
+		if (width > 0 && height > 0)
 			g.fillRect(x, y, width, height);
-		
+
 	}
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
-		if (endGame) {
-			System.out.println("END");
-			JOptionPane.showMessageDialog(this, "Your score : " + score);
-			System.exit(0);
+		if (endRound) {
+			handleEndRound();
+			repaint();
+			return;
 		}
-		
+
 		boolean posChanged = false;
 		switch (arg0.getKeyCode()) {
 		case KeyEvent.VK_UP:
@@ -166,46 +189,57 @@ public class GamePlay extends JPanel implements KeyListener {
 
 		default:
 			break;
-		}  
-		
+		}
+
 		if (posChanged) {
 			Direction keyCode = Direction.getDirectionFromCode(arg0.getKeyCode());
 			moves--;
 			System.out.println(ant + ". Mosse rimaste: " + moves);
-			int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(ant.getAntPosition(), M);
-			arffFile.writeCase(neighbourhood, keyCode);
+			int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(ant.getAntPosition(), visualField);
 			System.out.println(neighbourhood);
-			
-			
+			try {
+				arffFile.writeCase(neighbourhood, keyCode);
+			} catch (AntGameException e) {
+				throwedException = e;
+			}
+
 			score += chessboard.getPositionScoreAndDecrease(ant.getAntPosition());
-			if ( chessboard.isEndOfTheBoard(ant.getAntPosition()) || moves == 0)
-				endGame = true;
-			//chessboard.logChessboard(ant.getAntPosition());
+			if (chessboard.isEndOfTheBoard(ant.getAntPosition()) || moves == 0)
+				endRound = true;
+			// chessboard.logChessboard(ant.getAntPosition());
 			repaint();
 		}
-		
+
 	}
 
-	
-
-	private void computeScore() {
+	private void handleEndRound() {
+		System.out.println("END Round");
+		int response = JOptionPane.showConfirmDialog(this, "Punteggio : " + score + "\nVuoi fare un'altra partita?\n(Arricchirai il data set)", "Fine round", JOptionPane.YES_NO_OPTION);
+		switch (response) {
+		case JOptionPane.YES_OPTION:
+			newRound = true;
+			break;
+		default:
+			System.exit(0);
+			break;
+		}
+		
 		
 	}
 
 	@Override
 	public void keyReleased(KeyEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void keyTyped(KeyEvent arg0) {
-		//titleImage = new ImageIcon(getImage("ant_small.png"));
+		// titleImage = new ImageIcon(getImage("ant_small.png"));
 	}
-	
+
 	private static ImageIcon getImage(String imgName) {
 		return new ImageIcon(IMG_PATH + imgName);
 	}
-
 
 }

@@ -1,10 +1,8 @@
 package it.unipr.scarpenti.ant;
 
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.io.IOException;
 
 import javax.swing.JFrame;
 

@@ -1,7 +1,6 @@
 package it.unipr.scarpenti.ant;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public enum Direction {

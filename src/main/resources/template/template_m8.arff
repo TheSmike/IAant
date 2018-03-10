@@ -1,0 +1,97 @@
+
+@relation 'hungry Ant m=8'
+
+@attribute index-00 numeric
+@attribute index-01 numeric
+@attribute index-02 numeric
+@attribute index-03 numeric
+@attribute index-04 numeric
+@attribute index-05 numeric
+@attribute index-06 numeric
+@attribute index-07 numeric
+@attribute index-08 numeric
+
+@attribute index-10 numeric
+@attribute index-11 numeric
+@attribute index-12 numeric
+@attribute index-13 numeric
+@attribute index-14 numeric
+@attribute index-15 numeric
+@attribute index-16 numeric
+@attribute index-17 numeric
+@attribute index-18 numeric
+
+@attribute index-20 numeric
+@attribute index-21 numeric
+@attribute index-22 numeric
+@attribute index-23 numeric
+@attribute index-24 numeric
+@attribute index-25 numeric
+@attribute index-26 numeric
+@attribute index-27 numeric
+@attribute index-28 numeric
+
+@attribute index-30 numeric
+@attribute index-31 numeric
+@attribute index-32 numeric
+@attribute index-33 numeric
+@attribute index-34 numeric
+@attribute index-35 numeric
+@attribute index-36 numeric
+@attribute index-37 numeric
+@attribute index-38 numeric
+
+@attribute index-40 numeric
+@attribute index-41 numeric
+@attribute index-42 numeric
+@attribute index-43 numeric
+@attribute index-44 numeric
+@attribute index-45 numeric
+@attribute index-46 numeric
+@attribute index-47 numeric
+@attribute index-48 numeric
+
+@attribute index-50 numeric
+@attribute index-51 numeric
+@attribute index-52 numeric
+@attribute index-53 numeric
+@attribute index-54 numeric
+@attribute index-55 numeric
+@attribute index-56 numeric
+@attribute index-57 numeric
+@attribute index-58 numeric
+
+@attribute index-60 numeric
+@attribute index-61 numeric
+@attribute index-62 numeric
+@attribute index-63 numeric
+@attribute index-64 numeric
+@attribute index-65 numeric
+@attribute index-66 numeric
+@attribute index-67 numeric
+@attribute index-68 numeric
+
+@attribute index-70 numeric
+@attribute index-71 numeric
+@attribute index-72 numeric
+@attribute index-73 numeric
+@attribute index-74 numeric
+@attribute index-75 numeric
+@attribute index-76 numeric
+@attribute index-77 numeric
+@attribute index-78 numeric
+
+@attribute index-80 numeric
+@attribute index-81 numeric
+@attribute index-82 numeric
+@attribute index-83 numeric
+@attribute index-84 numeric
+@attribute index-85 numeric
+@attribute index-86 numeric
+@attribute index-87 numeric
+@attribute index-88 numeric
+
+@attribute direction { UP, DOWN, RIGHT, LEFT}
+
+@data
+
