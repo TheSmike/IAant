@@ -1,17 +1,17 @@
 
 @relation 'hungry Ant m=1'
 
-@attribute index-0,0 numeric
-@attribute index-0,1 numeric
-@attribute index-0,2 numeric
+@attribute index-0-0 numeric
+@attribute index-0-1 numeric
+@attribute index-0-2 numeric
 
-@attribute index-1,0 numeric
-@attribute index-1,1 numeric
-@attribute index-1,2 numeric
+@attribute index-1-0 numeric
+@attribute index-1-1 numeric
+@attribute index-1-2 numeric
 
-@attribute index-2,0 numeric
-@attribute index-2,1 numeric
-@attribute index-2,2 numeric
+@attribute index-2-0 numeric
+@attribute index-2-1 numeric
+@attribute index-2-2 numeric
 
 @attribute direction { UP, DOWN, RIGHT, LEFT}
 

@@ -1,4 +1,4 @@
-package it.unipr.scarpenti.ant;
+package it.unipr.scarpenti.ant.ui;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -10,7 +10,15 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import it.unipr.scarpenti.ant.Ant;
+import it.unipr.scarpenti.ant.AppData;
+import it.unipr.scarpenti.ant.ArffFile;
+import it.unipr.scarpenti.ant.Chessboard;
+import it.unipr.scarpenti.ant.Direction;
+import it.unipr.scarpenti.ant.Position;
 import it.unipr.scarpenti.ant.exception.AntGameException;
+import weka.classifiers.trees.J48;
+import weka.core.SerializationHelper;
 
 public class GamePlay extends JPanel implements KeyListener {
 
@@ -45,19 +53,27 @@ public class GamePlay extends JPanel implements KeyListener {
 	private Throwable throwedException = null;
 	private boolean newRound;
 	private int matchNumber;
+	private AppData appData;
+	private J48 classifier;
 
-	public GamePlay(int panelSize, int m) throws Exception {
+	public GamePlay(int panelSize, AppData appData) throws Exception {
 		super();
-		visualField = m;
+		visualField = appData.getVisualField();
 		PANEL_SIZE = panelSize;
+		this.appData = appData;
 		SQUARE_DIM = 50;
 
 		addKeyListener(this);
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
-		arffFile = new ArffFile(m);
+		arffFile = new ArffFile(visualField, this.appData);
 		newRound = true;
 		matchNumber = 0;
+		
+		if (AppData.PLAYER_IA.equals(appData.getWhoPlay())) {
+			classifier = (J48) SerializationHelper.read(appData.getModelPath());
+			System.out.println("classifier J48: " + classifier);
+		}
 	}
 
 	private void initRound() {
@@ -165,30 +181,37 @@ public class GamePlay extends JPanel implements KeyListener {
 		}
 
 		boolean posChanged = false;
-		switch (arg0.getKeyCode()) {
-		case KeyEvent.VK_UP:
-			yPos -= SQUARE_DIM;
-			ant.moveUp();
-			posChanged = true;
-			break;
-		case KeyEvent.VK_DOWN:
-			yPos += SQUARE_DIM;
-			ant.moveDown();
-			posChanged = true;
-			break;
-		case KeyEvent.VK_RIGHT:
-			xPos += SQUARE_DIM;
-			ant.moveRight();
-			posChanged = true;
-			break;
-		case KeyEvent.VK_LEFT:
-			xPos -= SQUARE_DIM;
-			ant.moveLeft();
-			posChanged = true;
-			break;
+		if (appData.getWhoPlay().equals(AppData.PLAYER_IA)) {
+			if (arg0.getKeyCode() == KeyEvent.VK_ENTER ||arg0.getKeyCode() == KeyEvent.VK_SPACE) {
+				posChanged = true;
+			}
+		} else {
 
-		default:
-			break;
+			switch (arg0.getKeyCode()) {
+			case KeyEvent.VK_UP:
+				yPos -= SQUARE_DIM;
+				ant.moveUp();
+				posChanged = true;
+				break;
+			case KeyEvent.VK_DOWN:
+				yPos += SQUARE_DIM;
+				ant.moveDown();
+				posChanged = true;
+				break;
+			case KeyEvent.VK_RIGHT:
+				xPos += SQUARE_DIM;
+				ant.moveRight();
+				posChanged = true;
+				break;
+			case KeyEvent.VK_LEFT:
+				xPos -= SQUARE_DIM;
+				ant.moveLeft();
+				posChanged = true;
+				break;
+
+			default:
+				break;
+			}
 		}
 
 		if (posChanged) {
@@ -214,7 +237,8 @@ public class GamePlay extends JPanel implements KeyListener {
 
 	private void handleEndRound() {
 		System.out.println("END Round");
-		int response = JOptionPane.showConfirmDialog(this, "Punteggio : " + score + "\nVuoi fare un'altra partita?\n(Arricchirai il data set)", "Fine round", JOptionPane.YES_NO_OPTION);
+		int response = JOptionPane.showConfirmDialog(this, "Partita n° " + 
+		matchNumber + "\nPunteggio : " + score + "\nVuoi fare un'altra partita?\n(Arricchirai il data set)", "Fine round", JOptionPane.YES_NO_OPTION);
 		switch (response) {
 		case JOptionPane.YES_OPTION:
 			newRound = true;
@@ -241,5 +265,8 @@ public class GamePlay extends JPanel implements KeyListener {
 	private static ImageIcon getImage(String imgName) {
 		return new ImageIcon(IMG_PATH + imgName);
 	}
+	
+	
+	
 
 }
