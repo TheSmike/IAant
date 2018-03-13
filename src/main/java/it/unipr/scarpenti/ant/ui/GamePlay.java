@@ -18,13 +18,6 @@ import it.unipr.scarpenti.ant.Direction;
 import it.unipr.scarpenti.ant.Position;
 import it.unipr.scarpenti.ant.exception.AntGameException;
 import it.unipr.scarpenti.ant.ia.IaClassifier;
-import weka.classifiers.trees.J48;
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SerializationHelper;
 
 public class GamePlay extends JPanel implements KeyListener {
 
@@ -195,6 +188,7 @@ public class GamePlay extends JPanel implements KeyListener {
 					direction = iaClassifier.getDirection(neighbourhood);
 				} catch (Exception e) {
 					throwedException = e;
+					repaint();
 					return;
 				}
 				System.out.println("IA direction: " + direction);
@@ -204,6 +198,7 @@ public class GamePlay extends JPanel implements KeyListener {
 			}
 		}
 
+		Position positionPre = ant.getAntPosition().deepCopy();
 		switch (arg0.getKeyCode()) {
 		case KeyEvent.VK_UP:
 			yPos -= SQUARE_DIM;
@@ -234,7 +229,7 @@ public class GamePlay extends JPanel implements KeyListener {
 			Direction keyCode = Direction.getDirectionFromCode(arg0.getKeyCode());
 			moves--;
 			System.out.println(ant + ". Mosse rimaste: " + moves);
-			int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(ant.getAntPosition(), visualField);
+			int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(positionPre, visualField);
 			System.out.println(neighbourhood);
 			try {
 				arffFile.writeCase(neighbourhood, keyCode);

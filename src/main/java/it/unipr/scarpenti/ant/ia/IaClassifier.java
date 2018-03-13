@@ -1,12 +1,14 @@
 package it.unipr.scarpenti.ant.ia;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import it.unipr.scarpenti.ant.AppData;
 import it.unipr.scarpenti.ant.Direction;
 import it.unipr.scarpenti.ant.exception.AntGameException;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
@@ -14,60 +16,52 @@ import weka.core.SerializationHelper;
 public class IaClassifier {
 
 	private J48 classifier;
-	private Instances isTrainingSet;
+	private Instances dataSetStructure;
+	private AppData appData;
 
 	public IaClassifier(AppData appData) throws Exception {
+		this.appData = appData;
 		classifier = (J48) SerializationHelper.read(appData.getModelPath());
 		System.out.println("classifier J48: " + classifier);
 
-		// Declare two numeric attributes
-		Attribute Attribute1 = new Attribute("index-0-0");
-		Attribute Attribute2 = new Attribute("index-0-1");
-		Attribute Attribute3 = new Attribute("index-0-2");
+		initClassifier();
+	}
 
-		Attribute Attribute4 = new Attribute("index-1-0");
-		Attribute Attribute5 = new Attribute("index-1-1");
-		Attribute Attribute6 = new Attribute("index-1-2");
-
-		Attribute Attribute7 = new Attribute("index-2-0");
-		Attribute Attribute8 = new Attribute("index-2-1");
-		Attribute Attribute9 = new Attribute("index-2-2");
-
+	private void initClassifier() {
 		// Declare the class attribute along with its values
-		FastVector fvClassVal = new FastVector(4);
-		fvClassVal.addElement("UP");
-		fvClassVal.addElement("DOWN");
-		fvClassVal.addElement("RIGTH");
-		fvClassVal.addElement("LEFT");
-		Attribute ClassAttribute = new Attribute("direction", fvClassVal);
+		List<String> fvClassVal = new ArrayList<>(4);
+		fvClassVal.add("UP");
+		fvClassVal.add("DOWN");
+		fvClassVal.add("RIGTH");
+		fvClassVal.add("LEFT");
+		Attribute classAttribute = new Attribute("direction", fvClassVal);
 
-		// Declare the feature vector
-		FastVector fvWekaAttributes = new FastVector(10);
-		fvWekaAttributes.addElement(Attribute1);
-		fvWekaAttributes.addElement(Attribute2);
-		fvWekaAttributes.addElement(Attribute3);
-		fvWekaAttributes.addElement(Attribute4);
-		fvWekaAttributes.addElement(Attribute5);
-		fvWekaAttributes.addElement(Attribute6);
-		fvWekaAttributes.addElement(Attribute7);
-		fvWekaAttributes.addElement(Attribute8);
-		fvWekaAttributes.addElement(Attribute9);
-		fvWekaAttributes.addElement(ClassAttribute);
+		ArrayList<Attribute> fvWekaAttributes = new ArrayList<>();
 
-		isTrainingSet = new Instances("Rel", fvWekaAttributes, 10);
-		isTrainingSet.setClassIndex(9);
+		int matSide = appData.getVisualField() * 2 + 1;
+		
+		for (int r = 0; r < matSide; r++) {
+			for (int c = 0; c < matSide; c++) {
+				fvWekaAttributes.add(new Attribute(String.format("index-%s-%s", r, c)));
+			}
+
+		}
+		fvWekaAttributes.add(classAttribute);
+
+		dataSetStructure = new Instances("Ant game m " + appData.getVisualField(), fvWekaAttributes, 10);
+		dataSetStructure.setClassIndex(matSide*matSide);
 	}
 
 	public Direction getDirection(int[][] neighbourhood) throws Exception {
 
-		Instance instance = new DenseInstance(10);
+		Instance instance = new DenseInstance(neighbourhood.length * neighbourhood.length);
 
 		for (int r = 0; r < neighbourhood.length; r++) {
 			for (int c = 0; c < neighbourhood.length; c++) {
 				instance.setValue(r * neighbourhood.length + c, neighbourhood[r][c]);
 			}
 		}
-		instance.setDataset(isTrainingSet);
+		instance.setDataset(dataSetStructure);
 		System.out.println("instance => " + instance);
 		double[] fDistribution = classifier.distributionForInstance(instance);
 
@@ -91,7 +85,7 @@ public class IaClassifier {
 		case 3:
 			return Direction.LEFT;
 		default:
-			throw new AntGameException("Direzione non prevista", null); 
+			throw new AntGameException("Direzione non prevista", null);
 		}
 
 	}

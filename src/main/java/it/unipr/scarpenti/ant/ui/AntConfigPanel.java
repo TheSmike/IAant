@@ -13,6 +13,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.lang3.StringUtils;
+
 import it.unipr.scarpenti.ant.AppData;
 import net.miginfocom.swing.MigLayout;
 import java.awt.event.ActionListener;
@@ -148,13 +150,20 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 
 	}
 
+	private String addSlash(String folderPath) {
+		if (StringUtils.isNotBlank(folderPath) && !folderPath.endsWith("/") && !folderPath.endsWith("\\"))
+			return folderPath+"/";
+		else
+			return folderPath;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		appData.setVisualField(rdbtnM1.isSelected() ? 1 : 2);
 		appData.setWhoPlay(rdbtnIaPlay.isSelected() ? AppData.PLAYER_IA : AppData.PLAYER_YOU);
 		appData.setWriteArffOn(rdbtnYesArff.isSelected());
-		appData.setOutputFolder(txtOutputFolder.getText());
+		appData.setOutputFolder(addSlash(txtOutputFolder.getText()));
 		appData.setModelPath(txtModelPath.getText());
 
 		try {

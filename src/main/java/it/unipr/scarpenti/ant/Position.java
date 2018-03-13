@@ -40,5 +40,9 @@ public class Position {
 			Position theOther = (Position) other; 
 			return (this.r == theOther.r && this.c == theOther.c);
 		}
+
+		public Position deepCopy() {
+			return new Position(this.r, this.c);
+		}
 		
 }
