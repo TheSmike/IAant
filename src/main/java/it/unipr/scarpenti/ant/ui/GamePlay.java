@@ -17,6 +17,7 @@ import it.unipr.scarpenti.ant.Chessboard;
 import it.unipr.scarpenti.ant.Direction;
 import it.unipr.scarpenti.ant.Position;
 import it.unipr.scarpenti.ant.exception.AntGameException;
+import it.unipr.scarpenti.ant.ia.IaClassifier;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -59,7 +60,7 @@ public class GamePlay extends JPanel implements KeyListener {
 	private boolean newRound;
 	private int matchNumber;
 	private AppData appData;
-	private J48 classifier;
+	private IaClassifier iaClassifier = null;
 
 	public GamePlay(int panelSize, AppData appData) throws Exception {
 		super();
@@ -76,8 +77,7 @@ public class GamePlay extends JPanel implements KeyListener {
 		matchNumber = 0;
 		
 		if (AppData.PLAYER_IA.equals(appData.getWhoPlay())) {
-			classifier = (J48) SerializationHelper.read(appData.getModelPath());
-			System.out.println("classifier J48: " + classifier);
+			iaClassifier = new IaClassifier(appData);
 		}
 	}
 
@@ -189,120 +189,46 @@ public class GamePlay extends JPanel implements KeyListener {
 		if (appData.getWhoPlay().equals(AppData.PLAYER_IA)) {
 			if (arg0.getKeyCode() == KeyEvent.VK_ENTER || arg0.getKeyCode() == KeyEvent.VK_SPACE) {
 				posChanged = true;
-
-				// Declare two numeric attributes
-				Attribute Attribute1 = new Attribute("index-0-0");
-				Attribute Attribute2 = new Attribute("index-0-1");
-				Attribute Attribute3 = new Attribute("index-0-2");
-
-				Attribute Attribute4 = new Attribute("index-1-0");
-				Attribute Attribute5 = new Attribute("index-1-1");
-				Attribute Attribute6 = new Attribute("index-1-2");
-
-				Attribute Attribute7 = new Attribute("index-2-0");
-				Attribute Attribute8 = new Attribute("index-2-1");
-				Attribute Attribute9 = new Attribute("index-2-2");
-
-				// Declare the class attribute along with its values
-				FastVector fvClassVal = new FastVector(4);
-				fvClassVal.addElement("UP");
-				fvClassVal.addElement("DOWN");
-				fvClassVal.addElement("RIGTH");
-				fvClassVal.addElement("LEFT");
-				Attribute ClassAttribute = new Attribute("direction", fvClassVal);
-
-				// Declare the feature vector
-				FastVector fvWekaAttributes = new FastVector(10);
-				fvWekaAttributes.addElement(Attribute1);
-				fvWekaAttributes.addElement(Attribute2);
-				fvWekaAttributes.addElement(Attribute3);
-				fvWekaAttributes.addElement(Attribute4);
-				fvWekaAttributes.addElement(Attribute5);
-				fvWekaAttributes.addElement(Attribute6);
-				fvWekaAttributes.addElement(Attribute7);
-				fvWekaAttributes.addElement(Attribute8);
-				fvWekaAttributes.addElement(Attribute9);
-				fvWekaAttributes.addElement(ClassAttribute);
-
-				Instances isTrainingSet = new Instances("Rel", fvWekaAttributes, 10);
-				isTrainingSet.setClassIndex(9);
-
-				Instance instance = new DenseInstance(10);
-
 				int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(ant.getAntPosition(), visualField);
-				for (int r = 0; r < neighbourhood.length; r++) {
-					for (int c = 0; c < neighbourhood.length; c++) {
-						instance.setValue(r * neighbourhood.length + c, neighbourhood[r][c]);
-						// instance.setValue(r*neighbourhood.length + c, neighbourhood[r][c]);
-					}
-				}
+				Direction direction;
 				try {
-					// Instances isTrainingSet = new Instances("Rel", fvWekaAttributes, 10);
-					instance.setDataset(isTrainingSet);
-					System.out.println("instance => "  + instance);
-					double[] fDistribution = classifier.distributionForInstance(instance);
-					
-					double max = 0;
-					int index = -1;
-					for (int i = 0; i < fDistribution.length; i++) {
-						System.out.println("fDistribution[i]=" + fDistribution[i]);
-						if (fDistribution[i] > max) {
-							index = i;
-							max = fDistribution[i];
-						}
-					}
-					System.out.println("direction : " + index + ", likelihood : " + max);
-					switch (index) {
-					case 0:
-						arg0.setKeyCode(KeyEvent.VK_UP);
-						break;
-					case 1:
-						arg0.setKeyCode(KeyEvent.VK_DOWN);
-						break;
-					case 2:
-						arg0.setKeyCode(KeyEvent.VK_LEFT);
-						break;
-					case 3:
-						arg0.setKeyCode(KeyEvent.VK_RIGHT);
-						break;
-					default:
-						break;
-					}
-
-					// classifier.classifyInstance(instance);
+					direction = iaClassifier.getDirection(neighbourhood);
 				} catch (Exception e) {
 					throwedException = e;
+					return;
 				}
-			} else
+				System.out.println("IA direction: " + direction);
+				arg0.setKeyCode(direction.getKeyCode());
+			} else {
 				return;
+			}
 		}
 
-			switch (arg0.getKeyCode()) {
-			case KeyEvent.VK_UP:
-				yPos -= SQUARE_DIM;
-				ant.moveUp();
-				posChanged = true;
-				break;
-			case KeyEvent.VK_DOWN:
-				yPos += SQUARE_DIM;
-				ant.moveDown();
-				posChanged = true;
-				break;
-			case KeyEvent.VK_RIGHT:
-				xPos += SQUARE_DIM;
-				ant.moveRight();
-				posChanged = true;
-				break;
-			case KeyEvent.VK_LEFT:
-				xPos -= SQUARE_DIM;
-				ant.moveLeft();
-				posChanged = true;
-				break;
+		switch (arg0.getKeyCode()) {
+		case KeyEvent.VK_UP:
+			yPos -= SQUARE_DIM;
+			ant.moveUp();
+			posChanged = true;
+			break;
+		case KeyEvent.VK_DOWN:
+			yPos += SQUARE_DIM;
+			ant.moveDown();
+			posChanged = true;
+			break;
+		case KeyEvent.VK_RIGHT:
+			xPos += SQUARE_DIM;
+			ant.moveRight();
+			posChanged = true;
+			break;
+		case KeyEvent.VK_LEFT:
+			xPos -= SQUARE_DIM;
+			ant.moveLeft();
+			posChanged = true;
+			break;
 
-			default:
-				break;
-			}
-		
+		default:
+			break;
+		}
 
 		if (posChanged) {
 			Direction keyCode = Direction.getDirectionFromCode(arg0.getKeyCode());

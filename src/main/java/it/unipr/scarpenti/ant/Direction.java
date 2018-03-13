@@ -23,9 +23,18 @@ public enum Direction {
 	
 	public Direction clockwiseNext() {
 		return valueMap.get((this.value+1)%4);
-		
 	}
 	
+	public int getKeyCode() {
+		return keyCode;
+	}
+
+	public void setKeyCode(int keyCode) {
+		this.keyCode = keyCode;
+	}
+
+
+
 	private static final Map<Integer, Direction> codeMap;
 	private static final Map<Integer, Direction> valueMap;
 	
