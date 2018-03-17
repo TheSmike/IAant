@@ -18,12 +18,17 @@ public class ArffFile {
 
 	private Path file;
 	private boolean writeArffOn;
+	private String whoPlay;
 
 	public ArffFile(int visibility, AppData appData) throws Exception {
+		whoPlay = appData.getWhoPlay();
 		writeArffOn = appData.isWriteArffOn();
 		if (writeArffOn) {
 			DateFormat df = new SimpleDateFormat("yyyyMMdd_hhmmss");
-			String fileName = String.format("ant_m%s_%s.arff", visibility, df.format(new Date()));
+			String seed = "";
+			if (appData.getSeedNumber() != null)
+				seed = "_seed" + appData.getSeedNumber();
+			String fileName = String.format("ant_m%s%s_%s.arff", visibility, seed, df.format(new Date()));
 			Path pathOut = Paths.get(appData.getOutputFolder() + fileName);
 			this.file = pathOut;
 			InputStream templateResource = getClass().getClassLoader()
@@ -58,13 +63,15 @@ public class ArffFile {
 
 				AntCase originalAntCase = new AntCase(neighbourhood, direction);
 				writeLineCase(originalAntCase, writer);
-				writeAllRotatedCase(writer, originalAntCase);
 
-				AntCase flippedAntCase = horizontalFlip(originalAntCase);
-				writeLineCase(flippedAntCase, writer);
-				writeAllRotatedCase(writer, flippedAntCase);
+				if (AppData.PLAYER_YOU.equals(whoPlay)) {
+					writeAllRotatedCase(writer, originalAntCase);
 
-				writer.println();
+					AntCase flippedAntCase = horizontalFlip(originalAntCase);
+					writeLineCase(flippedAntCase, writer);
+					writeAllRotatedCase(writer, flippedAntCase);
+					writer.println();
+				}
 			} catch (FileNotFoundException e) {
 				throw new InvalidPathException(e);
 			} finally {
@@ -90,7 +97,8 @@ public class ArffFile {
 		newAntCase.neighbourhood = new int[previousAntCase.neighbourhood.length][previousAntCase.neighbourhood.length];
 		for (int r = 0; r < newAntCase.neighbourhood.length; r++) {
 			for (int c = 0; c < newAntCase.neighbourhood.length; c++) {
-				newAntCase.neighbourhood[r][c] = previousAntCase.neighbourhood[r][newAntCase.neighbourhood.length - 1 - c];
+				newAntCase.neighbourhood[r][c] = previousAntCase.neighbourhood[r][newAntCase.neighbourhood.length - 1
+						- c];
 			}
 		}
 		if (previousAntCase.direction == Direction.LEFT || previousAntCase.direction == Direction.RIGHT)
@@ -106,7 +114,8 @@ public class ArffFile {
 		newAntCase.neighbourhood = new int[previousAntCase.neighbourhood.length][previousAntCase.neighbourhood.length];
 		for (int r = 0; r < newAntCase.neighbourhood.length; r++) {
 			for (int c = 0; c < newAntCase.neighbourhood.length; c++) {
-				newAntCase.neighbourhood[r][c] = previousAntCase.neighbourhood[newAntCase.neighbourhood.length - 1 - c][r];
+				newAntCase.neighbourhood[r][c] = previousAntCase.neighbourhood[newAntCase.neighbourhood.length - 1
+						- c][r];
 			}
 		}
 		newAntCase.direction = previousAntCase.direction.clockwiseNext();

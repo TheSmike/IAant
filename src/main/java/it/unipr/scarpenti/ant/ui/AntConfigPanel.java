@@ -22,6 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.awt.event.ActionEvent;
+import javax.swing.JCheckBox;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class AntConfigPanel extends JPanel implements ActionListener {
 	/**
@@ -37,6 +40,8 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 	private JRadioButton rdbtnNoArff;
 	private JRadioButton rdbtnYouPlay;
 	private JRadioButton rdbtnIaPlay;
+	private JTextField txtSeed;
+	private JCheckBox chckbxEnableSeed;
 
 	/**
 	 * Create the panel.
@@ -116,6 +121,24 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 
 		JButton btnNewButton = new JButton("Save and Play");
 		btnNewButton.addActionListener(this);
+		
+		chckbxEnableSeed = new JCheckBox("");
+		chckbxEnableSeed.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				txtSeed.setEnabled(chckbxEnableSeed.isSelected());
+				if (!chckbxEnableSeed.isSelected())
+					txtSeed.setText("");
+			}
+		});
+		add(chckbxEnableSeed, "flowx,cell 4 6");
+		
+		JLabel lblSeedNumber = new JLabel("seed number : ");
+		add(lblSeedNumber, "cell 4 6,alignx trailing");
+		
+		txtSeed = new JTextField();
+		txtSeed.setEnabled(false);
+		add(txtSeed, "cell 5 6 5 1,growx");
+		txtSeed.setColumns(10);
 		add(btnNewButton, "cell 5 10 3 1,alignx center,aligny bottom");
 
 		ButtonGroup groupM = new ButtonGroup();
@@ -147,6 +170,9 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 		rdbtnNoArff.setSelected(!writeArff);
 		txtOutputFolder.setText(appData.getOutputFolder());
 		txtModelPath.setText(appData.getModelPath());
+		if (appData.getSeedNumber() != null)
+			txtSeed.setText(String.valueOf(appData.getSeedNumber()));
+		chckbxEnableSeed.setSelected(appData.getSeedNumber() != null);
 
 	}
 
@@ -160,17 +186,25 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		appData.setVisualField(rdbtnM1.isSelected() ? 1 : 2);
-		appData.setWhoPlay(rdbtnIaPlay.isSelected() ? AppData.PLAYER_IA : AppData.PLAYER_YOU);
-		appData.setWriteArffOn(rdbtnYesArff.isSelected());
-		appData.setOutputFolder(addSlash(txtOutputFolder.getText()));
-		appData.setModelPath(txtModelPath.getText());
-
 		try {
+			appData.setVisualField(rdbtnM1.isSelected() ? 1 : 2);
+			appData.setWhoPlay(rdbtnIaPlay.isSelected() ? AppData.PLAYER_IA : AppData.PLAYER_YOU);
+			appData.setWriteArffOn(rdbtnYesArff.isSelected());
+			appData.setOutputFolder(addSlash(txtOutputFolder.getText()));
+			appData.setModelPath(txtModelPath.getText());
+			if (chckbxEnableSeed.isSelected())
+				appData.setSeedNumber(Integer.parseInt(txtSeed.getText()));
+			else
+				appData.setSeedNumber(null);
 			appData.saveProperties();
-		} catch (IOException e1) {
+			
+		} catch (Exception e1) {
+			String message = e1.getMessage();
+			if (e1 instanceof NumberFormatException)
+				message = "seed: valore non numerico";
+			e1.printStackTrace();
 			System.out.println("END");
-			JOptionPane.showMessageDialog(this, e1.getMessage(), "ERRORE", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, message, "ERRORE", JOptionPane.ERROR_MESSAGE);
 			System.exit(0);
 		}
 

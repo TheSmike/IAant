@@ -77,7 +77,7 @@ public class GamePlay extends JPanel implements KeyListener {
 	private void initRound() {
 		score = 0;
 		moves = 2 * N;
-		chessboard = new Chessboard(N);
+		chessboard = new Chessboard(N, appData.getSeedNumber());
 		Position initAntPosition = chessboard.initBaord();
 		ant = new Ant(initAntPosition);
 
@@ -173,7 +173,11 @@ public class GamePlay extends JPanel implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 		if (endRound) {
-			handleEndRound();
+			try {
+				handleEndRound();
+			} catch (AntGameException e) {
+				throwedException = e;
+			}
 			repaint();
 			return;
 		}
@@ -246,8 +250,9 @@ public class GamePlay extends JPanel implements KeyListener {
 
 	}
 
-	private void handleEndRound() {
+	private void handleEndRound() throws AntGameException {
 		System.out.println("END Round");
+		arffFile.writeComment("% match Result = " + score);
 		int response = JOptionPane.showConfirmDialog(this, "Partita n° " + 
 		matchNumber + "\nPunteggio : " + score + "\nVuoi fare un'altra partita?\n(Arricchirai il data set)", "Fine round", JOptionPane.YES_NO_OPTION);
 		switch (response) {

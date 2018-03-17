@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class AppData {
 
 	public static final String PLAYER_IA = "IA";
@@ -16,6 +18,7 @@ public class AppData {
 	private static final String PROP_M_FOR_VISIBILITY = "m_for_visibility";
 	private static final String PROP_OUTPUT_FOLDER = "output_folder";
 	private static final String PROP_WRITE_ARFF_FILE = "write_arff_file";
+	private static final String PROP_SEED = "seed_number";
 	
 	private static final String CONFIG_FILE_NAME = "antConfig.properties";
 	private static final Properties DEFAULTS;
@@ -28,6 +31,7 @@ public class AppData {
 		DEFAULTS.setProperty(PROP_M_FOR_VISIBILITY, "1");
 		DEFAULTS.setProperty(PROP_MODEL_PATH, "");
 		DEFAULTS.setProperty(PROP_WHO_PLAY, AppData.PLAYER_YOU);
+		DEFAULTS.setProperty(PROP_SEED, "");
 	}
 
 	public AppData() throws IOException {
@@ -93,6 +97,21 @@ public class AppData {
 	}
 	public void setOutputFolder(String value) {
 		props.setProperty(PROP_OUTPUT_FOLDER, value);		
+	}
+	
+	public Integer getSeedNumber() {
+		String property = props.getProperty(PROP_SEED);
+		if (StringUtils.isBlank(property))
+			return null;
+		else
+			return Integer.parseInt(property);
+	}
+
+	public void setSeedNumber(Integer value) {
+		if (value == null)
+			props.setProperty(PROP_SEED, "");
+		else
+			props.setProperty(PROP_SEED, String.valueOf(value));
 	}
 
 
