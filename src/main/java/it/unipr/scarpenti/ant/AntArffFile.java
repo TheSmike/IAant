@@ -14,13 +14,13 @@ import java.util.Date;
 import it.unipr.scarpenti.ant.exception.AntGameException;
 import it.unipr.scarpenti.ant.exception.InvalidPathException;
 
-public class ArffFile {
+public class AntArffFile {
 
 	private Path file;
 	private boolean writeArffOn;
 	private String whoPlay;
 
-	public ArffFile(int visibility, AppData appData) throws Exception {
+	public AntArffFile(int visibility, AppData appData) throws Exception {
 		whoPlay = appData.getWhoPlay();
 		writeArffOn = appData.isWriteArffOn();
 		if (writeArffOn) {

@@ -13,13 +13,13 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
 
-public class IaClassifier {
+public class AntClassifier {
 
 	private J48 classifier;
 	private Instances dataSetStructure;
 	private AppData appData;
 
-	public IaClassifier(AppData appData) throws Exception {
+	public AntClassifier(AppData appData) throws Exception {
 		this.appData = appData;
 		classifier = (J48) SerializationHelper.read(appData.getModelPath());
 		System.out.println("classifier J48: " + classifier);

@@ -12,12 +12,12 @@ import javax.swing.JPanel;
 
 import it.unipr.scarpenti.ant.Ant;
 import it.unipr.scarpenti.ant.AppData;
-import it.unipr.scarpenti.ant.ArffFile;
+import it.unipr.scarpenti.ant.AntArffFile;
 import it.unipr.scarpenti.ant.Chessboard;
 import it.unipr.scarpenti.ant.Direction;
 import it.unipr.scarpenti.ant.Position;
 import it.unipr.scarpenti.ant.exception.AntGameException;
-import it.unipr.scarpenti.ant.ia.IaClassifier;
+import it.unipr.scarpenti.ant.ia.AntClassifier;
 
 public class GamePlay extends JPanel implements KeyListener {
 
@@ -47,13 +47,13 @@ public class GamePlay extends JPanel implements KeyListener {
 	private boolean endRound = false;
 	private Chessboard chessboard;
 	private Ant ant;
-	private ArffFile arffFile;
+	private AntArffFile arffFile;
 	private int moves;
 	private Throwable throwedException = null;
 	private boolean newRound;
 	private int matchNumber;
 	private AppData appData;
-	private IaClassifier iaClassifier = null;
+	private AntClassifier iaClassifier = null;
 
 	public GamePlay(int panelSize, AppData appData) throws Exception {
 		super();
@@ -65,12 +65,12 @@ public class GamePlay extends JPanel implements KeyListener {
 		addKeyListener(this);
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
-		arffFile = new ArffFile(visualField, this.appData);
+		arffFile = new AntArffFile(visualField, this.appData);
 		newRound = true;
 		matchNumber = 0;
 		
 		if (AppData.PLAYER_IA.equals(appData.getWhoPlay())) {
-			iaClassifier = new IaClassifier(appData);
+			iaClassifier = new AntClassifier(appData);
 		}
 	}
 
