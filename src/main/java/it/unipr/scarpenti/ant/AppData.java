@@ -19,9 +19,15 @@ public class AppData {
 	private static final String PROP_OUTPUT_FOLDER = "output_folder";
 	private static final String PROP_WRITE_ARFF_FILE = "write_arff_file";
 	private static final String PROP_SEED = "seed_number";
+	private static final String PROP_LOOP_ON_SEEDS = "loop_on_seeds";
+	private static final String PROP_LOOP_COUNT = "loop_count";
+	private static final String PROP_AUTOPLAY = "autoplay";
+	
 	
 	private static final String CONFIG_FILE_NAME = "antConfig.properties";
 	private static final Properties DEFAULTS;
+	
+	
 	private Properties props;
 
 	static {
@@ -114,7 +120,39 @@ public class AppData {
 			props.setProperty(PROP_SEED, String.valueOf(value));
 	}
 
+	public boolean isLoopOnSeedsOn() {
+		return "Y".equals(props.getProperty(PROP_LOOP_ON_SEEDS));
+	}
 
+	public void setLoopOnSeeds(boolean value) {
+		props.setProperty(PROP_LOOP_ON_SEEDS, value?"Y":"N");
+		
+	}
+
+	public Integer getLoopCount() {
+		String property = props.getProperty(PROP_LOOP_COUNT);
+		if (StringUtils.isBlank(property))
+			return null;
+		else
+			return Integer.parseInt(property);
+	}
+	
+	public void setLoopCount(Integer loopCount) {
+		if (loopCount == null)
+			props.setProperty(PROP_LOOP_COUNT, "");
+		else
+			props.setProperty(PROP_LOOP_COUNT, String.valueOf(loopCount));
+	}
+
+
+	public boolean isAutoPlayOn() {
+		return "Y".equals(props.getProperty(PROP_AUTOPLAY));
+	}
+
+	public void setAutoPlayOn(boolean value) {
+		props.setProperty(PROP_AUTOPLAY, value?"Y":"N");
+		
+	}
 
 
 

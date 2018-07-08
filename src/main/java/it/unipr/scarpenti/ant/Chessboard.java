@@ -11,9 +11,9 @@ public class Chessboard {
 	private int[][] board;
 	private final int N;
 	private List<Position> foodList;
-	private Integer seedNumber;
+	private int seedNumber;
 
-	public Chessboard(int N, Integer seedNumber) {
+	public Chessboard(int N, int seedNumber) {
 		this.N = N;
 		this.seedNumber = seedNumber;
 		board = new int[N + 2][N + 2];
@@ -22,8 +22,7 @@ public class Chessboard {
 	public Position initBaord() {
 		Position antPosition = null;
 		Random random = new Random();
-		if (seedNumber != null)
-			random.setSeed(seedNumber);
+		random.setSeed(seedNumber);
 		
 		// init bussolotto da cui estrarre le N posizioni con cibo
 		List<Integer> bussolotto = new ArrayList<>(N * N);

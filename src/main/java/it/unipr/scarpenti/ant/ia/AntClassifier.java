@@ -6,7 +6,7 @@ import java.util.List;
 import it.unipr.scarpenti.ant.AppData;
 import it.unipr.scarpenti.ant.Direction;
 import it.unipr.scarpenti.ant.exception.AntGameException;
-import weka.classifiers.trees.J48;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -15,14 +15,20 @@ import weka.core.SerializationHelper;
 
 public class AntClassifier {
 
-	private J48 classifier;
+	public enum ClassifierType {
+		J48,
+		NN
+	}
+
+	private AbstractClassifier classifier;
 	private Instances dataSetStructure;
 	private AppData appData;
 
 	public AntClassifier(AppData appData) throws Exception {
 		this.appData = appData;
-		classifier = (J48) SerializationHelper.read(appData.getModelPath());
-		System.out.println("classifier J48: " + classifier);
+		classifier = (AbstractClassifier) SerializationHelper.read(appData.getModelPath());
+		System.out.println("classifier: " + classifier);
+
 
 		initClassifier();
 	}
@@ -54,7 +60,7 @@ public class AntClassifier {
 
 	public Direction getDirection(int[][] neighbourhood) throws Exception {
 
-		Instance instance = new DenseInstance(neighbourhood.length * neighbourhood.length);
+		Instance instance = new DenseInstance(neighbourhood.length * neighbourhood.length +1);
 
 		for (int r = 0; r < neighbourhood.length; r++) {
 			for (int c = 0; c < neighbourhood.length; c++) {

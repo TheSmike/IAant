@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -16,6 +17,7 @@ import it.unipr.scarpenti.ant.AntArffFile;
 import it.unipr.scarpenti.ant.Chessboard;
 import it.unipr.scarpenti.ant.Direction;
 import it.unipr.scarpenti.ant.Position;
+import it.unipr.scarpenti.ant.ResultFile;
 import it.unipr.scarpenti.ant.exception.AntGameException;
 import it.unipr.scarpenti.ant.ia.AntClassifier;
 
@@ -48,12 +50,14 @@ public class GamePlay extends JPanel implements KeyListener {
 	private Chessboard chessboard;
 	private Ant ant;
 	private AntArffFile arffFile;
+	private ResultFile resultFile;
 	private int moves;
 	private Throwable throwedException = null;
 	private boolean newRound;
 	private int matchNumber;
 	private AppData appData;
 	private AntClassifier iaClassifier = null;
+	private int initSeed, actualSeed;
 
 	public GamePlay(int panelSize, AppData appData) throws Exception {
 		super();
@@ -66,18 +70,23 @@ public class GamePlay extends JPanel implements KeyListener {
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
 		arffFile = new AntArffFile(visualField, this.appData);
+		resultFile = new ResultFile(this.appData);
 		newRound = true;
 		matchNumber = 0;
 		
 		if (AppData.PLAYER_IA.equals(appData.getWhoPlay())) {
 			iaClassifier = new AntClassifier(appData);
 		}
+		
+		initSeed = getInitSeed();
+		actualSeed = initSeed;
+		
 	}
 
 	private void initRound() {
 		score = 0;
 		moves = 2 * N;
-		chessboard = new Chessboard(N, appData.getSeedNumber());
+		chessboard = new Chessboard(N, actualSeed);
 		Position initAntPosition = chessboard.initBaord();
 		ant = new Ant(initAntPosition);
 
@@ -161,6 +170,9 @@ public class GamePlay extends JPanel implements KeyListener {
 		}
 		// CHECKME ci vuole?
 		g.dispose();
+		if(appData.isAutoPlayOn() && AppData.PLAYER_IA.equals(appData.getWhoPlay())) {
+			handleAntMove(KeyEvent.VK_ENTER);
+		}
 
 	}
 
@@ -172,6 +184,11 @@ public class GamePlay extends JPanel implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
+		handleAntMove(arg0.getKeyCode());
+
+	}
+
+	private void handleAntMove(int keyboardCod) {
 		if (endRound) {
 			try {
 				handleEndRound();
@@ -184,7 +201,7 @@ public class GamePlay extends JPanel implements KeyListener {
 
 		boolean posChanged = false;
 		if (appData.getWhoPlay().equals(AppData.PLAYER_IA)) {
-			if (arg0.getKeyCode() == KeyEvent.VK_ENTER || arg0.getKeyCode() == KeyEvent.VK_SPACE) {
+			if (keyboardCod == KeyEvent.VK_ENTER || keyboardCod == KeyEvent.VK_SPACE) {
 				posChanged = true;
 				int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(ant.getAntPosition(), visualField);
 				Direction direction;
@@ -196,14 +213,14 @@ public class GamePlay extends JPanel implements KeyListener {
 					return;
 				}
 				System.out.println("IA direction: " + direction);
-				arg0.setKeyCode(direction.getKeyCode());
+				keyboardCod = direction.getKeyCode();
 			} else {
 				return;
 			}
 		}
 
 		Position positionPre = ant.getAntPosition().deepCopy();
-		switch (arg0.getKeyCode()) {
+		switch (keyboardCod) {
 		case KeyEvent.VK_UP:
 			yPos -= SQUARE_DIM;
 			ant.moveUp();
@@ -230,11 +247,11 @@ public class GamePlay extends JPanel implements KeyListener {
 		}
 
 		if (posChanged) {
-			Direction keyCode = Direction.getDirectionFromCode(arg0.getKeyCode());
+			Direction keyCode = Direction.getDirectionFromCode(keyboardCod);
 			moves--;
 			System.out.println(ant + ". Mosse rimaste: " + moves);
 			int[][] neighbourhood = chessboard.getChessBoardNeighbourhood(positionPre, visualField);
-			System.out.println(neighbourhood);
+			//System.out.println(neighbourhood);
 			try {
 				arffFile.writeCase(neighbourhood, keyCode);
 			} catch (AntGameException e) {
@@ -247,24 +264,45 @@ public class GamePlay extends JPanel implements KeyListener {
 			// chessboard.logChessboard(ant.getAntPosition());
 			repaint();
 		}
-
 	}
 
 	private void handleEndRound() throws AntGameException {
 		System.out.println("END Round");
 		arffFile.writeComment("% match Result = " + score);
-		int response = JOptionPane.showConfirmDialog(this, "Partita n° " + 
-		matchNumber + "\nPunteggio : " + score + "\nVuoi fare un'altra partita?\n(Arricchirai il data set)", "Fine round", JOptionPane.YES_NO_OPTION);
-		switch (response) {
-		case JOptionPane.YES_OPTION:
-			newRound = true;
-			break;
-		default:
-			System.exit(0);
-			break;
+		//seed, score
+		resultFile.write(actualSeed, score);
+		if (appData.isLoopOnSeedsOn()) {
+			if (!appData.isAutoPlayOn()) {
+			JOptionPane.showMessageDialog(
+					this,
+					"Seed n° " + actualSeed + "\nPunteggio : " + score,
+					"Fine round",
+					JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+			if (actualSeed < appData.getLoopCount() + initSeed) {
+				newRound = true;
+				actualSeed++;
+			}
+			else
+				System.exit(0);
+		} else {
+			int response = JOptionPane.showConfirmDialog(
+					this,
+					"Partita n° " + matchNumber + "\nPunteggio : " + score + "\nVuoi fare un'altra partita?\n(Arricchirai il data set)",
+					"Fine round",
+					JOptionPane.YES_NO_OPTION);
+
+			switch (response) {
+			case JOptionPane.YES_OPTION:
+				newRound = true;
+				break;
+			default:
+				System.exit(0);
+				break;
+			}
 		}
-		
-		
+
 	}
 
 	@Override
@@ -282,7 +320,28 @@ public class GamePlay extends JPanel implements KeyListener {
 		return new ImageIcon(IMG_PATH + imgName);
 	}
 	
-	
+	private Integer getInitSeed() {
+		Integer seedNumber = appData.getSeedNumber();
+		
+		if (appData.isLoopOnSeedsOn()) {
+			
+			if (seedNumber == null)
+				return 1;
+			else
+				return seedNumber;
+		}
+		else {
+			if (seedNumber == null) {
+				Random random = new Random();
+				int nextInt = random.nextInt();
+				random = null;
+				return nextInt;
+				
+			}else {
+				return appData.getSeedNumber(); 
+			}
+		}
+	}
 	
 
 }

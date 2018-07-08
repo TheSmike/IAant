@@ -42,17 +42,24 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 	private JRadioButton rdbtnIaPlay;
 	private JTextField txtSeed;
 	private JCheckBox chckbxEnableSeed;
+	private JRadioButton rdbtnLoopOnSeedsNo;
+	private JRadioButton rdbtnLoopOnSeedsYes;
+	private JTextField txtLoopCount;
+	private JLabel lblAutoPlay;
+	private JRadioButton rdbtnAutoplayNo;
+	private JRadioButton rdbtnAutoplayYes;
+	private JLabel lblCount;
 
 	/**
 	 * Create the panel.
 	 */
 	public AntConfigPanel(AppData appData) {
 		this.appData = appData;
-		setLayout(new MigLayout("", "[][][][][right][grow,left][36.00,left][][][][]", "[][][][][][][][][][][]"));
+		setLayout(new MigLayout("", "[][][][][right][grow,left][36.00,left][][][grow][][][]", "[][][][][][][][][][][]"));
 
 		JLabel lblAntConfiguration = new JLabel("ANT Game");
 		lblAntConfiguration.setFont(new Font("Tahoma", Font.BOLD, 15));
-		add(lblAntConfiguration, "cell 0 0 11 1,alignx center");
+		add(lblAntConfiguration, "cell 0 0 13 1,alignx center");
 
 		JLabel lblChiGioca = new JLabel("Who play?  ");
 		add(lblChiGioca, "cell 4 1");
@@ -85,11 +92,11 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 		add(lblCartellaDiOutput, "cell 4 4,alignx trailing");
 
 		txtOutputFolder = new JTextField();
-		add(txtOutputFolder, "cell 5 4 5 1,growx");
+		add(txtOutputFolder, "cell 5 4 7 1,growx");
 		txtOutputFolder.setColumns(10);
 
 		JButton btnSelectoutputFolder = new JButton("Select a folder ...");
-		add(btnSelectoutputFolder, "cell 10 4");
+		add(btnSelectoutputFolder, "cell 12 4");
 		btnSelectoutputFolder.addActionListener(e -> {
 			JFileChooser fileChooser = new JFileChooser();
 			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -105,10 +112,10 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 
 		txtModelPath = new JTextField();
 		txtModelPath.setColumns(10);
-		add(txtModelPath, "cell 5 5 5 1,growx");
+		add(txtModelPath, "cell 5 5 7 1,growx");
 
 		JButton btnSelectModelFile = new JButton("Select a file ...");
-		add(btnSelectModelFile, "cell 10 5");
+		add(btnSelectModelFile, "cell 12 5");
 		btnSelectModelFile.addActionListener(e -> {
 			JFileChooser fileChooser = new JFileChooser();
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -122,6 +129,25 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 		JButton btnNewButton = new JButton("Save and Play");
 		btnNewButton.addActionListener(this);
 		
+		lblAutoPlay = new JLabel("auto play:");
+		add(lblAutoPlay, "cell 4 6,alignx trailing");
+		
+		rdbtnAutoplayNo = new JRadioButton("No");
+		add(rdbtnAutoplayNo, "cell 5 6");
+		
+		rdbtnAutoplayYes = new JRadioButton("Yes");
+		add(rdbtnAutoplayYes, "cell 6 6");
+		
+		JLabel lblLoopOnSeeds = new JLabel("Loop on seeds:");
+		add(lblLoopOnSeeds, "cell 4 7");
+		
+		rdbtnLoopOnSeedsNo = new JRadioButton("No");
+		rdbtnLoopOnSeedsNo.setSelected(true);
+		add(rdbtnLoopOnSeedsNo, "cell 5 7");
+		
+		rdbtnLoopOnSeedsYes = new JRadioButton("Yes");
+		add(rdbtnLoopOnSeedsYes, "cell 6 7");
+		
 		chckbxEnableSeed = new JCheckBox("");
 		chckbxEnableSeed.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -130,14 +156,21 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 					txtSeed.setText("");
 			}
 		});
-		add(chckbxEnableSeed, "flowx,cell 4 6");
+		
+		lblCount = new JLabel("count");
+		add(lblCount, "cell 8 7,alignx trailing");
+		
+		txtLoopCount = new JTextField();
+		add(txtLoopCount, "cell 9 7 3 1,growx");
+		txtLoopCount.setColumns(10);
+		add(chckbxEnableSeed, "flowx,cell 4 8");
 		
 		JLabel lblSeedNumber = new JLabel("seed number : ");
-		add(lblSeedNumber, "cell 4 6,alignx trailing");
+		add(lblSeedNumber, "cell 4 8,alignx trailing");
 		
 		txtSeed = new JTextField();
 		txtSeed.setEnabled(false);
-		add(txtSeed, "cell 5 6 5 1,growx");
+		add(txtSeed, "cell 5 8 7 1,growx");
 		txtSeed.setColumns(10);
 		add(btnNewButton, "cell 5 10 3 1,alignx center,aligny bottom");
 
@@ -153,6 +186,21 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 		groupWriteArff.add(rdbtnNoArff);
 		groupWriteArff.add(rdbtnYesArff);
 
+		ButtonGroup groupLoopOnSeeds = new ButtonGroup();
+		groupLoopOnSeeds.add(rdbtnLoopOnSeedsNo);
+		groupLoopOnSeeds.add(rdbtnLoopOnSeedsYes);
+		
+		
+		rdbtnLoopOnSeedsYes.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				txtLoopCount.setEnabled(rdbtnLoopOnSeedsYes.isSelected());
+			}
+		});
+		
+		ButtonGroup groupAutoplay = new ButtonGroup();
+		groupAutoplay.add(rdbtnAutoplayNo);
+		groupAutoplay.add(rdbtnAutoplayYes);
+		
 		// init Fields
 		initFields();
 
@@ -173,6 +221,14 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 		if (appData.getSeedNumber() != null)
 			txtSeed.setText(String.valueOf(appData.getSeedNumber()));
 		chckbxEnableSeed.setSelected(appData.getSeedNumber() != null);
+		rdbtnLoopOnSeedsYes.setSelected(appData.isLoopOnSeedsOn());
+		rdbtnLoopOnSeedsNo.setSelected(!appData.isLoopOnSeedsOn());
+		txtLoopCount.setEnabled(rdbtnLoopOnSeedsYes.isSelected());
+		if (appData.getLoopCount() != null)
+			txtLoopCount.setText(String.valueOf(appData.getLoopCount()));
+		rdbtnAutoplayNo.setSelected(!appData.isAutoPlayOn());
+		rdbtnAutoplayYes.setSelected(appData.isAutoPlayOn());
+		
 
 	}
 
@@ -196,6 +252,15 @@ public class AntConfigPanel extends JPanel implements ActionListener {
 				appData.setSeedNumber(Integer.parseInt(txtSeed.getText()));
 			else
 				appData.setSeedNumber(null);
+			appData.setLoopOnSeeds(rdbtnLoopOnSeedsYes.isSelected());
+			
+			if (rdbtnLoopOnSeedsYes.isSelected())
+				appData.setLoopCount(Integer.parseInt(txtLoopCount.getText()));
+			else
+				appData.setLoopCount(null);
+			
+			appData.setAutoPlayOn(rdbtnAutoplayYes.isSelected());
+			
 			appData.saveProperties();
 			
 		} catch (Exception e1) {
